@@ -1,4 +1,40 @@
-<!DOCTYPE html>
+<form id="registerForm" class="card">
+    <h2>Registrarse</h2>
+    <div class="form-group">
+        <i class="fas fa-user"></i>
+        <input type="text" id="nombre" placeholder="Nombre completo" required>
+    </div>
+    <div class="form-group">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+    </div>
+    <div class="form-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" placeholder="Contraseña (mínimo 6 caracteres)" required>
+    </div>
+    <div class="form-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="confirmPassword" placeholder="Confirmar contraseña" required>
+    </div>
+    <button type="submit" class="btn-primary">Registrarse</button>
+    <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+</form>
+<script src="auth.js"></script><form id="loginForm" class="card">
+    <h2>Iniciar Sesión</h2>
+    <div class="form-group">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+    </div>
+    <div class="form-group">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" placeholder="Contraseña" required>
+    </div>
+    <button type="submit" class="btn-primary">Iniciar Sesión</button>
+    <p>¿No tienes cuenta? <a href="register.html">Regístrate aquí</a></p>
+</form>
+<script src="auth.js"></script><script src="auth.js"></script>
+<script src="app.js"></script>document.addEventListener('DOMContentLoaded', () => {
+ <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">

@@ -1,117 +1,110 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
+// auth.js - Manejo de autenticación
 
-    // Función para verificar si hay un usuario logueado
-    function checkAuth() {
-        const token = localStorage.getItem('token');
-        if (token) {
-            window.location.href = 'index.html';
-        }
+// Verificar autenticación
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    if (!token && !window.location.pathname.endsWith('login.html') && 
+        !window.location.pathname.endsWith('register.html')) {
+        window.location.href = 'login.html';
     }
+    return token;
+}
 
-    // Función para mostrar mensaje
-    function showMessage(type, message) {
-        const messageContainer = document.createElement('div');
-        messageContainer.className = `message ${type}`;
-        messageContainer.textContent = message;
-        const form = document.querySelector('form');
-        form.insertBefore(messageContainer, form.firstChild);
+// Registrar nuevo usuario
+function setupRegisterForm() {
+    const form = document.getElementById('registerForm');
+    if (!form) return;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
         
-        // Eliminar mensaje después de 3 segundos
-        setTimeout(() => {
-            messageContainer.remove();
-        }, 3000);
-    }
+        const nombre = document.getElementById('nombre').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
 
-    // Función para generar token
-    function generateToken() {
-        return Math.random().toString(36).substring(2) + Date.now().toString(36);
-    }
+        // Validaciones
+        if (password !== confirmPassword) {
+            alert('Las contraseñas no coinciden');
+            return;
+        }
 
-    // Evento submit del formulario de login
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        if (password.length < 6) {
+            alert('La contraseña debe tener al menos 6 caracteres');
+            return;
+        }
 
-            try {
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                const user = users.find(u => u.email === email && u.password === password);
+        if (!email.includes('@')) {
+            alert('Por favor ingresa un email válido');
+            return;
+        }
 
-                if (user) {
-                    const token = generateToken();
-                    localStorage.setItem('token', token);
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                    showMessage('success', '¡Bienvenido!');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                } else {
-                    showMessage('error', 'Correo o contraseña incorrectos');
-                }
-            } catch (error) {
-                showMessage('error', 'Error al iniciar sesión');
-            }
-        });
-    }
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        if (users.some(user => user.email === email)) {
+            alert('Este correo ya está registrado');
+            return;
+        }
 
-    // Evento submit del formulario de registro
-    if (registerForm) {
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const nombre = document.getElementById('nombre').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+        const newUser = {
+            id: Date.now().toString(),
+            nombre,
+            email,
+            password,
+            gastos: [],
+            ingresos: [],
+            patrimonio: [],
+            objetivos: []
+        };
 
-            if (password !== confirmPassword) {
-                showMessage('error', 'Las contraseñas no coinciden');
-                return;
-            }
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+        localStorage.setItem('token', 'dummy-token');
 
-            try {
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                const existingUser = users.find(u => u.email === email);
+        window.location.href = 'index.html';
+    });
+}
 
-                if (existingUser) {
-                    showMessage('error', 'Este correo ya está registrado');
-                    return;
-                }
+// Iniciar sesión
+function setupLoginForm() {
+    const form = document.getElementById('loginForm');
+    if (!form) return;
 
-                const newUser = {
-                    id: Date.now().toString(),
-                    nombre,
-                    email,
-                    password,
-                    gastos: [],
-                    ingresos: [],
-                    patrimonio: [],
-                    objetivos: [],
-                    createdAt: new Date().toISOString()
-                };
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-                users.push(newUser);
-                localStorage.setItem('users', JSON.stringify(users));
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const user = users.find(u => u.email === email && u.password === password);
 
-                // Iniciar sesión automáticamente
-                const token = generateToken();
-                localStorage.setItem('token', token);
-                localStorage.setItem('currentUser', JSON.stringify(newUser));
+        if (user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.setItem('token', 'dummy-token');
+            window.location.href = 'index.html';
+        } else {
+            alert('Credenciales incorrectas');
+        }
+    });
+}
 
-                showMessage('success', '¡Registro exitoso!');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
-            } catch (error) {
-                showMessage('error', 'Error al registrar');
-            }
-        });
-    }
+// Cerrar sesión
+function setupLogoutButton() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (!logoutBtn) return;
 
-    // Verificar autenticación al cargar
+    logoutBtn.addEventListener('click', function() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        window.location.href = 'login.html';
+    });
+}
+
+// Inicializar autenticación
+document.addEventListener('DOMContentLoaded', function() {
     checkAuth();
+    setupRegisterForm();
+    setupLoginForm();
+    setupLogoutButton();
 });
